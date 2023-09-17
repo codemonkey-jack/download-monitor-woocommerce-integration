@@ -21,18 +21,28 @@ class DMWCIntegration {
     /**
      * Hook in and add the download monitor field to link the download. 
      * Works with all WooCommerce product types.
+     * Make the field a Select2 to enhance the user experience to search downloads.
      */
 
-    public function add_download_monitor_field() {
+     public function add_download_monitor_field() {
         global $post;
         echo '<div class="options_group">';
         woocommerce_wp_select([
             'id' => '_download_monitor_id',
             'label' => 'Link Download',
-            'options' => array('' => 'Select Download') + $this->get_download_monitor_options()
+            'options' => array('' => 'Select Download') + $this->get_download_monitor_options(),
+            'class' => 'wc-enhanced-select', 
+            'style' => 'width: 400px;'
         ]);
         echo '</div>';
+        // Inline JavaScript to initialize Select2
+        echo '<script type="text/javascript">
+            jQuery(document).ready(function($) {
+                $(".wc-enhanced-select").select2();
+            });
+        </script>';
     }
+    
 
     /**
      * Save the download monitor field and update the associated meta with the correct ID.
