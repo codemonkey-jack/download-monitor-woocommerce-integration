@@ -29,7 +29,7 @@ class DMWCIntegration {
         woocommerce_wp_select([
             'id' => '_download_monitor_id',
             'label' => 'Link Download',
-            'options' => $this->get_download_monitor_options()
+            'options' => array('' => 'Select Download') + $this->get_download_monitor_options()
         ]);
         echo '</div>';
     }
