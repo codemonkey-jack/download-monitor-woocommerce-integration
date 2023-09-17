@@ -9,15 +9,13 @@ class DMWCIntegration {
      * Hook into the required WooCommerce areas. 
      * woocommerce_product_options_general integrates the link download.
      * woocommerce_process_product_meta saves the download meta field.
-     * woocommece_account_menu_items adds the new download monitor menu item to the my account area on the front-end. 
+     * woocommece_account_downloads_endpoint hooks into the existing download tab to output our content.
      */
 
     public function init() {
         add_action('woocommerce_product_options_general_product_data', [$this, 'add_download_monitor_field']);
         add_action('woocommerce_process_product_meta', [$this, 'save_download_monitor_field']);
-        add_filter('woocommerce_account_menu_items', [$this, 'add_download_monitor_tab']);
-        add_action('init', [$this, 'add_download_monitor_endpoint']);
-        add_action('woocommerce_account_download_monitor_endpoint', [$this, 'show_download_monitor_content']);
+        add_action('woocommerce_account_downloads_endpoint', [$this, 'show_download_monitor_content']);
     }
 
     /**
@@ -66,7 +64,7 @@ class DMWCIntegration {
      * Block the download access if they haven't purchased the content.
      */
 
-    public function show_download_monitor_content() {
+     public function show_download_monitor_content() {
         $user_id = get_current_user_id();
         if (!$user_id) {
             echo "You must be logged in to view downloads.";
@@ -78,6 +76,11 @@ class DMWCIntegration {
         $download_ids = [];
     
         foreach ($orders as $order) {
+            // Check if the order is completed
+            if ($order->get_status() !== 'completed') {
+                continue;
+            }
+    
             $items = $order->get_items();
             foreach ($items as $item) {
                 $product_id = $item->get_product_id();
@@ -89,10 +92,12 @@ class DMWCIntegration {
         }
     
         if (empty($download_ids)) {
+            echo "<h2>Download Monitor Downloads</h2>";
             echo "No downloads available.";
             return;
         }
     
+        echo "<h2>Download Monitor Downloads</h2>";
         echo "<ul>";
         foreach ($download_ids as $download_id) {
             $download = get_post($download_id);
@@ -101,7 +106,8 @@ class DMWCIntegration {
             }
         }
         echo "</ul>";
-    }    
+    }
+    
 
     private function get_download_monitor_options() {
         // Fetch Download Monitor downloads. 
